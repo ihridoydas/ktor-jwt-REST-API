@@ -5,7 +5,14 @@ import java.util.UUID
 
 class UserRepository {
 
-    private val users = mutableListOf<User>()
+    private val users = mutableListOf(
+        User(
+            id = UUID.randomUUID(),
+            username = "admin",
+            password = "password",
+            role = "ADMIN"
+        )
+    )
 
     fun findAll(): List<User> = users
 

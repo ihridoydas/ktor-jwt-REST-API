@@ -4,6 +4,7 @@ import info.hridoydas.model.User
 import info.hridoydas.routing.request.UserRequest
 import info.hridoydas.routing.response.UserResponse
 import info.hridoydas.service.UserService
+import info.hridoydas.util.authorized
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -34,29 +35,33 @@ fun Route.userRoute(
     }
 
     authenticate {
-        get {
-            val users = userService.findAll()
+        authorized("ADMIN") {
+            get {
+                val users = userService.findAll()
 
-            call.respond(
-                message = users.map(User::toResponse)
-            )
+                call.respond(
+                    message = users.map(User::toResponse)
+                )
+            }
         }
     }
 
     authenticate("another-auth") {
-        get("/{id}") {
-            val id: String = call.parameters["id"]
-                ?: return@get call.respond(HttpStatusCode.BadRequest)
+        authorized("ADMIN", "USER") {
+            get("/{id}") {
+                val id: String = call.parameters["id"]
+                    ?: return@get call.respond(HttpStatusCode.BadRequest)
 
-            val foundUser = userService.findById(id)
-                ?: return@get call.respond(HttpStatusCode.NotFound)
+                val foundUser = userService.findById(id)
+                    ?: return@get call.respond(HttpStatusCode.NotFound)
 
-            if (foundUser.username != extractPrincipalUsername(call))
-                return@get call.respond(HttpStatusCode.NotFound)
+                if (foundUser.username != extractPrincipalUsername(call))
+                    return@get call.respond(HttpStatusCode.NotFound)
 
-            call.respond(
-                message = foundUser.toResponse()
-            )
+                call.respond(
+                    message = foundUser.toResponse()
+                )
+            }
         }
     }
 }
@@ -72,6 +77,7 @@ private fun UserRequest.toModel(): User =
         id = UUID.randomUUID(),
         username = this.username,
         password = this.password,
+        role = "USER"
     )
 
 private fun User.toResponse(): UserResponse =

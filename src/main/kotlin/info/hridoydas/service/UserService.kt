@@ -35,8 +35,8 @@ class UserService(
         val foundUser = userRepository.findByUsername(username)
 
         return if (foundUser != null && foundUser.password == loginRequest.password) {
-            val accessToken = jwtService.createAccessToken(username)
-            val refreshToken = jwtService.createRefreshToken(username)
+            val accessToken = jwtService.createAccessToken(username, foundUser.role)
+            val refreshToken = jwtService.createRefreshToken(username, foundUser.role)
 
             refreshTokenRepository.save(refreshToken, username)
             AuthResponse(
@@ -55,7 +55,7 @@ class UserService(
             val usernameFromRefreshToken = decodeRefreshToken.getClaim("username").asString()
 
             if (foundUser != null && usernameFromRefreshToken == foundUser.username) {
-                jwtService.createAccessToken(persistedUsername)
+                jwtService.createAccessToken(persistedUsername, foundUser.role)
             } else
                 null
 
