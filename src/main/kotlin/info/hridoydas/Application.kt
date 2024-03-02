@@ -1,6 +1,6 @@
 package info.hridoydas
 
-import info.hridoydas.plugins.*
+import info.hridoydas.plugins.configureSerialization
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -11,7 +11,5 @@ fun main() {
 }
 
 fun Application.module() {
-    configureSecurity()
     configureSerialization()
-    configureRouting()
 }
