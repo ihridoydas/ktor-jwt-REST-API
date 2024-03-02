@@ -6,6 +6,8 @@ import info.hridoydas.routing.response.UserResponse
 import info.hridoydas.service.UserService
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -31,26 +33,39 @@ fun Route.userRoute(
         )
     }
 
-    get {
-        val users = userService.findAll()
+    authenticate {
+        get {
+            val users = userService.findAll()
 
-        call.respond(
-            message = users.map(User::toResponse)
-        )
+            call.respond(
+                message = users.map(User::toResponse)
+            )
+        }
     }
 
-    get("/{id}") {
-        val id: String = call.parameters["id"]
-            ?: return@get call.respond(HttpStatusCode.BadRequest)
+    authenticate("another-auth") {
+        get("/{id}") {
+            val id: String = call.parameters["id"]
+                ?: return@get call.respond(HttpStatusCode.BadRequest)
 
-        val foundUser = userService.findById(id)
-            ?: return@get call.respond(HttpStatusCode.NotFound)
+            val foundUser = userService.findById(id)
+                ?: return@get call.respond(HttpStatusCode.NotFound)
 
-        call.respond(
-            message = foundUser.toResponse()
-        )
+            if (foundUser.username != extractPrincipalUsername(call))
+                return@get call.respond(HttpStatusCode.NotFound)
+
+            call.respond(
+                message = foundUser.toResponse()
+            )
+        }
     }
 }
+
+fun extractPrincipalUsername(call: ApplicationCall): String? =
+    call.principal<JWTPrincipal>()
+        ?.payload
+        ?.getClaim("username")
+        ?.asString()
 
 private fun UserRequest.toModel(): User =
     User(
