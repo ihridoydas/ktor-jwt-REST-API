@@ -37,6 +37,16 @@
 		{
 			"name": "Get All Users",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJteS1hdWRpZW5jZSIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3QiLCJ1c2VybmFtZSI6InNvbWVVc2VybmFtZSIsImV4cCI6MTcwOTM1NDk3OX0.6Fr-SlWYYpx87VwaF4dM86fbi5IVotaMiu8B1Kt1X0U",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
@@ -57,10 +67,20 @@
 		{
 			"name": "Get Users by ID",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJteS1hdWRpZW5jZSIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3QiLCJ1c2VybmFtZSI6InNvbWVVc2VybmFtZSIsImV4cCI6MTcwOTM1NTczMn0.HmC7Mc88ZpXRPEFgQPM2-ck4b4YrKSWUaxXYFNn2-gY",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/user/f731d7ad-9811-4a3a-9f3e-7f6fa896b517",
+					"raw": "http://localhost:8080/api/user/2b142780-7633-4d25-bcab-b47df30d837e",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -69,7 +89,36 @@
 					"path": [
 						"api",
 						"user",
-						"f731d7ad-9811-4a3a-9f3e-7f6fa896b517"
+						"2b142780-7633-4d25-bcab-b47df30d837e"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Auth",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"someUsername\",\n    \"password\": \"pwd\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/auth",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth"
 					]
 				}
 			},
