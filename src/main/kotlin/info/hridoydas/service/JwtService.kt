@@ -3,14 +3,14 @@ package info.hridoydas.service
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
-import info.hridoydas.routing.request.LoginRequest
+import info.hridoydas.repository.UserRepository
 import io.ktor.server.application.*
 import io.ktor.server.auth.jwt.*
 import java.util.*
 
 class JwtService(
     private val application: Application,
-    private val userService: UserService
+    private val userRepository: UserRepository
 ) {
 
     private val secret = getConfigProperty("jwt.secret")
@@ -25,26 +25,25 @@ class JwtService(
             .withIssuer(issuer)
             .build()
 
+    fun createAccessToken(username: String): String =
+        createJwtToken(username, 3_600_00)
 
-    fun createJwtToken(loginRequest: LoginRequest): String? {
-        val foundUser = userService.findByUsername(loginRequest.username)
+    fun createRefreshToken(username: String): String =
+        createJwtToken(username, 86_400_000)
 
-        return if (foundUser != null && foundUser.password == loginRequest.password) {
-            JWT
-                .create()
-                .withAudience(audience)
-                .withIssuer(issuer)
-                .withClaim("username", foundUser.username)
-                .withExpiresAt(Date(System.currentTimeMillis() + 3_600_000))
-                .sign(Algorithm.HMAC256(secret))
 
-        } else null
-
-    }
+    private fun createJwtToken(username: String, expireIn: Int): String =
+        JWT
+            .create()
+            .withAudience(audience)
+            .withIssuer(issuer)
+            .withClaim("username", username)
+            .withExpiresAt(Date(System.currentTimeMillis() + expireIn))
+            .sign(Algorithm.HMAC256(secret))
 
     fun customValidator(credential: JWTCredential): JWTPrincipal? {
         val username = extractUsername(credential)
-        val foundUser = username?.let(userService::findByUsername)
+        val foundUser = username?.let(userRepository::findByUsername)
 
         return foundUser?.let {
             if (audienceMatches(credential)) {
@@ -52,6 +51,10 @@ class JwtService(
             } else null
         }
     }
+
+    fun audienceMatches(audience: String): Boolean =
+        this.audience == audience
+
 
     private fun audienceMatches(credential: JWTCredential): Boolean =
         credential.payload.audience.contains(audience)

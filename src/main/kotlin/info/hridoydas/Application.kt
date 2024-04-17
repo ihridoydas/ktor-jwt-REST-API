@@ -2,6 +2,7 @@ package info.hridoydas
 
 import info.hridoydas.plugins.configureSecurity
 import info.hridoydas.plugins.configureSerialization
+import info.hridoydas.repository.RefreshTokenRepository
 import info.hridoydas.repository.UserRepository
 import info.hridoydas.routing.configureRouting
 import info.hridoydas.service.JwtService
@@ -16,9 +17,15 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     val userRepository = UserRepository()
-    val userService = UserService(userRepository)
-    val jwtService = JwtService(this, userService)
+    val jwtService = JwtService(this, userRepository)
+    val refreshTokenRepository = RefreshTokenRepository()
+    val userService = UserService(
+        userRepository = userRepository,
+        jwtService = jwtService,
+        refreshTokenRepository = refreshTokenRepository
+    )
+
     configureSerialization()
     configureSecurity(jwtService)
-    configureRouting(userService, jwtService)
+    configureRouting(userService)
 }
